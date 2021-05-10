@@ -1,0 +1,90 @@
+version: '3'
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+    networks:
+      - sensor-reporter-network
+
+  kafka:
+    image: wurstmeister/kafka:2.11-1.1.1
+    ports:
+      - "9092:9092"
+    links:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_DELETE_TOPIC_ENABLE: 'true'
+      KAFKA_CREATE_TOPICS: "create-sensor:1:1,sensor-response:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - sensor-reporter-network
+
+  backend: 
+    build: ./Sensor.Reporter
+    ports: 
+      - "5000:80"
+      - "5001:443"
+    environment: 
+      CONNECTION_STRING: Host=postgres;Database=sensor_reporter;Username=postgres;Password=postgres;
+      KAFKA_BROKER: kafka:9092
+      KAFKA_CLIENT_ID: sensor-reporter
+      KAFKA_TOPIC: create-event
+      CLIENT_URL: http://frontend:3000
+    networks:
+      - sensor-reporter-network
+
+  emulator:
+    build: ./Sensor.Emulator
+    environment: 
+      KAFKA_BROKER: kafka:9092
+      KAFKA_CLIENT_ID: sensor-reporter
+      KAFKA_TOPIC: create-event
+    depends_on: 
+      - backend
+    networks:
+      - sensor-reporter-network
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+    ports:
+      - "5432:5432"
+    volumes:
+      - /var/lib/postgresql/data:/var/lib/postgresql/data 
+    networks:
+      - sensor-reporter-network
+      
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "sensor-reporter@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "postgres"
+    ports:
+      - "15432:80"
+    depends_on:
+      - postgres
+    networks:
+      - sensor-reporter-network
+
+  frontend:
+    build: ./Sensor.UI
+    environment:
+      NEXT_PUBLIC_API_URL: "http://backend:5000/api"
+      NEXT_PUBLIC_EVENT_HUB: "http://backend:5000/sensorsHub"
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - sensor-reporter-network    
+      
+networks: 
+  sensor-reporter-network:
+    driver: bridge

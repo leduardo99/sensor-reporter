@@ -1,0 +1,36 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:51715",
+      "sslPort": 44377
+    }
+  },
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "Sensor.Reporter": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "CONNECTION_STRING": "Host=localhost;Database=sensor_reporter;Username=postgres;Password=postgres;Port=15432",
+        "KAFKA_CLIENT_ID": "sensor-reporter",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "KAFKA_BROKER": "kafka:9092"
+      },
+      "applicationUrl": "https://localhost:5001;http://localhost:5000"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "publishAllPorts": true,
+      "useSSL": true
+    }
+  }
+}

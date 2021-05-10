@@ -1,0 +1,21 @@
+{
+  "name": "emulator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node build/index.js",
+    "dev": "nodemon src/index.js",
+    "build": "sucrase ./src -d build --transforms imports"
+  },
+  "dependencies": {
+    "faker": "^5.5.3",
+    "kafkajs": "^1.15.0",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "dotenv": "^8.4.0",
+    "nodemon": "^2.0.7",
+    "sucrase": "^3.18.1"
+  }
+}
